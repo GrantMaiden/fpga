@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="test">
+		<CBX_INST_ENTRY INSTANCE_NAME="|test|altpll0:inst|altpll:altpll_component" CBX_FILE_NAME="altpll0_altpll.v"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|test|lpm_mux0:inst3|lpm_mux:LPM_MUX_component" CBX_FILE_NAME="mux_arc.tdf"/>
+	</PROJECT>
+</LOG_ROOT>

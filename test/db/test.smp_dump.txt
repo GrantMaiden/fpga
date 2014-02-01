@@ -1,0 +1,11 @@
+
+State Machine - |test|led_serial_driver:inst5|sdi_state
+Name sdi_state.state_sdi_clock_setup sdi_state.state_sdi_clock_low sdi_state.state_sdi_clock_high sdi_state.state_sdi_brightness_delay sdi_state.state_sdi_done_latching sdi_state.state_sdi_latching sdi_state.state_sdi_shifting sdi_state.state_sdi_idle 
+sdi_state.state_sdi_idle 0 0 0 0 0 0 0 0 
+sdi_state.state_sdi_shifting 0 0 0 0 0 0 1 1 
+sdi_state.state_sdi_latching 0 0 0 0 0 1 0 1 
+sdi_state.state_sdi_done_latching 0 0 0 0 1 0 0 1 
+sdi_state.state_sdi_brightness_delay 0 0 0 1 0 0 0 1 
+sdi_state.state_sdi_clock_high 0 0 1 0 0 0 0 1 
+sdi_state.state_sdi_clock_low 0 1 0 0 0 0 0 1 
+sdi_state.state_sdi_clock_setup 1 0 0 0 0 0 0 1 
