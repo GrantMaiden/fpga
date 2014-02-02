@@ -21,7 +21,7 @@ output wire          sclk;
 output wire		    	latch;
 output wire          n_output_enable;
 
-reg [3:0] bits;
+reg [7:0] data_in;
 reg sclk_enable   = 1'b0;
 reg sdi_enable    = 1'b0;
 
@@ -37,14 +37,15 @@ localparam state_sclk_enabled          = 8'b01;
 reg [7:0] sclk_state = state_sclk_idle;
 
 // SDI state machine       
-localparam state_sdi_idle              = 8'b000;
-localparam state_sdi_shifting          = 8'b001;
-localparam state_sdi_latching          = 8'b010;
-localparam state_sdi_done_latching     = 8'b011;
-localparam state_sdi_brightness_delay  = 8'b100;
-localparam state_sdi_clock_high        = 8'b101;
-localparam state_sdi_clock_low         = 8'b110;
-localparam state_sdi_clock_setup       = 8'b111;
+localparam state_sdi_idle              = 8'b0000;
+localparam state_sdi_shifting          = 8'b0001;
+localparam state_sdi_latch_hold        = 8'b0010;
+localparam state_sdi_done_latching     = 8'b0011;
+localparam state_sdi_brightness_delay  = 8'b0100;
+localparam state_sdi_clock_high        = 8'b0101;
+localparam state_sdi_clock_low         = 8'b0110;
+localparam state_sdi_clock_setup       = 8'b0111;
+localparam state_sdi_latch_enable      = 8'b1000;
 reg [7:0] sdi_state = state_sdi_idle;
 
 
@@ -68,8 +69,9 @@ always @(posedge CLOCK_5, posedge reset)
          
          state_enabled:
             begin
-               bits <= in;
-               sdi_enable <= 1'b1;
+//               data_in     <= {4'b1111, in};   // TODO: latch into an internal shift register
+               data_in     <= {in, 4'b1111};   // TODO: latch into an internal shift register
+               sdi_enable  <= 1'b1;
 
 //               if (!enable)
 //                  main_state <= state_idle;
@@ -99,7 +101,8 @@ always @(posedge CLOCK_5)
       case (sdi_state)
          state_sdi_idle:
             begin
-               output_enable <= 1'b1;
+               output_enable  <= 1'b1;
+               latch_enable   <= 1'b0;
                
                if (sdi_enable)
                   sdi_state <= state_sdi_shifting;
@@ -115,27 +118,27 @@ always @(posedge CLOCK_5)
                sclk_enable    <= 1'b1;
 `endif            
 
-               latch_enable   <= 1'b0;
-               pos            <= pos + 1;
-               data           <= in[pos];
+//               latch_enable   <= 1'b0;
+               data           = data_in[pos];
+               pos            = pos + 1;
             
 `ifdef BIT_BANG_CLOCK               
-               if (pos < 8'd8)
+               if (pos <= 8'd7)
                   begin
-                  sdi_state <= state_sdi_clock_setup;
+                     sdi_state <= state_sdi_clock_setup;
                   end
                else
                   begin
                      pos            <= 0;
                      data           <= 1'b0;
-                     latch_enable   <= 1'b1;
-                     sdi_state      <= state_sdi_latching;
+//                     latch_enable   <= 1'b1;
+                     sdi_state      <= state_sdi_latch_enable;
                   end
 `else
                if (pos == 7'd7)
                   begin
                      pos            <= 0;
-                     sdi_state      <= state_sdi_latching;
+                     sdi_state      <= state_sdi_latch_enable;
                   end
 `endif                  
             end
@@ -158,10 +161,19 @@ always @(posedge CLOCK_5)
                sdi_state            <= state_sdi_shifting;
             end
        
-         state_sdi_latching:
+         state_sdi_latch_enable:
             begin
                data                 <= 1'b0;
-               sclk_enable          <= 1'b1;
+//               sclk_enable          <= 1'b1;
+//               latch_enable         <= 1'b1;
+               latch_enable         <= 1'b0;
+               sdi_state            <= state_sdi_latch_hold;
+            end
+            
+         state_sdi_latch_hold:
+            begin
+               data                 <= 1'b0;
+//               sclk_enable          <= 1'b1;
                latch_enable         <= 1'b1;
                sdi_state            <= state_sdi_done_latching;
             end
@@ -196,7 +208,8 @@ always @(posedge CLOCK_5)
 `else
    assign sdi              = data & sclk;
 `endif   
-   assign latch            = latch_enable & sclk;
+//   assign latch            = latch_enable & sclk;
+   assign latch            = latch_enable;
    assign n_output_enable  = output_enable;
 
 
