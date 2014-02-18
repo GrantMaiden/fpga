@@ -1,1 +1,5 @@
 *.flock
+DE1-SoC - Copy/
+*.done
+DE1-SoC/c5_pin_model_dump.txt
+DE1-SoC/hc_output/DE1_SOC.names_drv_tbl

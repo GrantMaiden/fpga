@@ -54,15 +54,12 @@ reg [6:0]  hex4;
 reg [6:0]  hex5;
 reg [31:0] hexleds;
 
-//wire [41:0] HEXBANK = {HEX0, HEX1, HEX2, HEX3, HEX4, HEX5};
-
 
 //=======================================================
 //  Structural coding
 //=======================================================
 
 pll10MHz pll_10(.refclk(CLOCK_50), .rst(reset), .outclk_0(CLOCK_5), .locked(pll_locked));
-
 assign reset  = 0;
 //assign LEDR[9] = pll_locked;
 
@@ -70,7 +67,7 @@ assign reset  = 0;
 always @(posedge CLOCK_5)
     begin
         counter <= counter + 1;
-        hexleds <= counter[47:16];
+        hexleds <= counter[51:20];
     end
 
     
