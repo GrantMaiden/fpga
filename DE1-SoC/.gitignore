@@ -1,0 +1,14 @@
+*~
+*.swp
+db
+incremental_db
+work
+quartus_output
+PLLJ_PLLSPE_INFO.txt
+*.cr.mti
+*.bak
+*.vpp
+*.vcd
+*.rpt
+*.smsg
+*.summary
