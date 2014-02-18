@@ -61,7 +61,18 @@ set_location_assignment PIN_D1 -to LED[4]
 set_location_assignment PIN_F3 -to LED[5]
 set_location_assignment PIN_B1 -to LED[6]
 set_location_assignment PIN_L3 -to LED[7]
-set_location_assignment PIN_J14 -to CLOCK_REF
+set_location_assignment PIN_K16 -to CLOCK_REF
+set_location_assignment PIN_F13 -to LED_SCLK
+set_location_assignment PIN_T13 -to LED_LATCH
+set_location_assignment PIN_T15 -to LED_SDI
+set_location_assignment PIN_T12 -to LED_nOE
+set_location_assignment PIN_J14 -to LCD_RESET
+set_location_assignment PIN_J13 -to LCD_TFT_nCS
+set_location_assignment PIN_J16 -to LCD_SCK
+set_location_assignment PIN_K15 -to LCD_MISO
+set_location_assignment PIN_L13 -to LCD_MOSI
+set_location_assignment PIN_M10 -to LCD_DATA_CMD
+set_global_assignment -name VERILOG_FILE spi_master.v
 set_global_assignment -name VERILOG_FILE led_serial_driver.v
 set_global_assignment -name VERILOG_FILE splitter3x4.v
 set_global_assignment -name VERILOG_FILE simple_counter.v
@@ -69,8 +80,4 @@ set_global_assignment -name QIP_FILE altpll0.qip
 set_global_assignment -name BDF_FILE test.bdf
 set_global_assignment -name QIP_FILE lpm_mux0.qip
 set_global_assignment -name CDF_FILE Chain1.cdf
-set_location_assignment PIN_F13 -to LED_SCLK
-set_location_assignment PIN_T13 -to LED_LATCH
-set_location_assignment PIN_T15 -to LED_SDI
-set_location_assignment PIN_T12 -to LED_nOE
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

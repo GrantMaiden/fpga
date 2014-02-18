@@ -1,0 +1,176 @@
+
+module led_serial_driver(CLOCK_5, reset, enable, in, sdi, sclk, latch);
+
+input  wire				CLOCK_5;
+input  wire          reset;
+input  wire          enable;
+input  wire	[3:0] 	in;
+output reg 		    	sdi;
+output reg           sclk;
+output reg 		    	latch;
+
+// Main state machine
+localparam idle               = 8'b00;
+localparam enabled            = 8'b01;
+reg [7:0] main_state = idle;
+
+// SCLK state machine       
+localparam sclk_idle          = 8'b00;
+localparam sclk_enabled       = 8'b01;
+reg [7:0] sclk_state = sclk_idle;
+
+// SDI state machine       
+localparam sdi_idle           = 8'b00;
+localparam sdi_shifting       = 8'b01;
+localparam sdi_latching       = 8'b10;
+localparam sdi_done_latching  = 8'b11;
+reg [7:0] sdi_state = sdi_idle;
+
+// signals
+reg sclk_enable   = 1'b0;
+reg sdi_enable    = 1'b0;
+reg sdi_done      = 1'b0;
+
+
+// Main state machine
+always @(posedge CLOCK_5)
+   begin
+      if (reset)
+         begin
+            main_state <= idle;
+            //sclk_enable = 1'b0;
+            sdi_enable  = 1'b0;
+            //sdi_done    = 1'b0;
+         end
+   
+      case (main_state)
+         idle:
+           if (enable)
+              main_state <= enabled;
+         
+         enabled:
+            begin
+               //if (sdi_done)
+               //   sdi_enable <= 1'b0;   // TODO; periodically re-enable SDI
+               //else
+                  sdi_enable <= 1'b1;
+
+               if (!enabled)
+                  main_state <= idle;
+            end
+         
+         default:
+            main_state <= idle;
+      endcase;
+   end
+       
+
+// SCLK state machine       
+always @(CLOCK_5)
+   begin
+      if (sclk_enable)
+         sclk_state <= sclk_enabled;
+      else
+         sclk_state <= sclk_idle;
+
+      case (sclk_state)
+         sclk_idle:
+            sclk = 0;
+            
+         sclk_enabled:
+            sclk <= CLOCK_5;
+
+         default:
+            sclk_state <= sclk_idle;
+      endcase;
+   end
+   
+
+
+// SDI state machine
+reg [7:0] 	pos      = 8'b0;
+
+//always @(negedge CLOCK_5)
+//   begin
+//      sdi <= 1'b0;
+//   end
+   
+always @(posedge CLOCK_5)
+   begin
+      if (sdi_enable)
+         sdi_state <= sdi_shifting;
+      else 
+         sdi_state <= sdi_idle;
+   
+      case (sdi_state)
+         sdi_idle:
+            begin
+               pos   <= 8'b0;
+               sdi   <= 1'b0;
+               latch <= 1'b0;
+            end
+         
+         sdi_shifting:
+            begin
+               sclk_enable <= 1'b1;
+            
+               //sdi <= in[pos];
+               sdi <= !sdi;
+               pos <= pos + 1'b1;
+               
+               // TEST:
+               //latch <= 1'b1;
+               
+               if (pos >= 8'd8)
+                  begin
+                     sdi_state <= sdi_latching;
+                  end
+            end
+         
+         sdi_latching:
+            begin
+               pos         <= 1'b0;
+               latch       <= 1'b1;
+               //sdi_state   <= sdi_done_latching;
+            end
+            
+         sdi_done_latching:
+            begin
+               sclk_enable <= 1'b0;
+               latch       <= 1'b1;
+               //sdi_done    <= 1'b1;
+               sdi_state   <= sdi_idle;
+            end
+            
+         default:
+            sdi_state <= sdi_idle;
+      endcase
+   end
+   
+   
+   
+   
+//assign sclk = CLOCK_5;
+//
+//always @ (posedge CLOCK_5)
+//	begin
+//		counter <= counter + 1;
+//
+//      // Toggle every other data bit high/low
+//      sdi = !sdi;
+//      
+//      if (sdi)
+//         pos <= pos + 1;
+//      
+//      // After clocking out 8 bits, assert the latch
+//      if (pos == 4'd8)
+//         begin
+//            latch <= 1'b1;
+//            pos   <= 1'b0;
+//         end
+//      else
+//         latch <= 1'b0;
+//   end
+
+
+endmodule
